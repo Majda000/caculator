@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Chat App",
+      title: "Calculator App",
       theme: ThemeData(primarySwatch: Colors.blueGrey),
       home: const HomePage(),
     );
@@ -21,32 +21,55 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  final List<Message> _messages = [];
+class HomePageState extends State<HomePage> {
+  var num1 = 0, num2 = 0, sum = 0;
+  final TextEditingController t1 = TextEditingController(text: "0");
+  final TextEditingController t2 = TextEditingController(text: "0");
 
-  final TextEditingController _controller = TextEditingController();
-  Message? _replyingTo;
-
-  void _sendMessage() {
-    if (_controller.text.isNotEmpty) {
-      setState(() {
-        _messages.add(Message(text: _controller.text, replyTo: _replyingTo));
-        _controller.clear();
-        _replyingTo = null;
-      });
-    }
+  void doAddition() {
+    setState(() {
+      num1 = int.parse(t1.text);
+      num2 = int.parse(t2.text);
+      sum = num1 + num2;
+    });
   }
 
-  void _replyToMessage(Message message) {
+  void doSubtraction() {
     setState(() {
-      _replyingTo = message;
-      _controller.text = 'Replying to: ${message.text}\n';
-      _controller.selection = TextSelection.fromPosition(
-        TextPosition(offset: _controller.text.length),
-      );
+      num1 = int.parse(t1.text);
+      num2 = int.parse(t2.text);
+      sum = num1 - num2;
+    });
+  }
+
+  void doMultiplication() {
+    setState(() {
+      num1 = int.parse(t1.text);
+      num2 = int.parse(t2.text);
+      sum = num1 * num2;
+    });
+  }
+
+  void doDivision() {
+    setState(() {
+      num1 = int.parse(t1.text);
+      num2 = int.parse(t2.text);
+      if (num2 != 0) {
+        sum = num1 ~/ num2; // Use integer division to avoid decimal points
+      } else {
+        sum = 0; // Handle division by zero
+      }
+    });
+  }
+
+  void doClear() {
+    setState(() {
+      t1.text = "0";
+      t2.text = "0";
+      sum = 0;
     });
   }
 
@@ -54,116 +77,69 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Mahii App"),
+        title: const Text("Calculator App"),
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                return ChatMessageBubble(
-                  message: _messages[index],
-                  onReply: _replyToMessage,
-                );
-              },
-            ),
-          ),
-          _buildTextComposer(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextComposer() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              decoration: const InputDecoration.collapsed(
-                hintText: "Send a message",
+      body: Padding(
+        padding: const EdgeInsets.all(60.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              "Output: $sum",
+              style: const TextStyle(
+                fontSize: 20.0,
+                color: Colors.purple,
               ),
-              onSubmitted: (text) => _sendMessage(),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: _sendMessage,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ChatMessageBubble extends StatelessWidget {
-  final Message message;
-  final ValueChanged<Message> onReply;
-
-  const ChatMessageBubble({
-    super.key,
-    required this.message,
-    required this.onReply,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            margin: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              child: Text(message.text[0]),
+            TextField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                hintText: "Enter number 1",
+              ),
+              controller: t1,
             ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            TextField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                hintText: "Enter number 2",
+              ),
+              controller: t2,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Text(
-                  "Mahii",
-                  // ignore: deprecated_member_use
-                  style: Theme.of(context).textTheme.subtitle1,
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  onPressed: doAddition,
+                  child: const Text("+"),
                 ),
-                if (message.replyTo != null)
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    margin: const EdgeInsets.only(top: 5.0, bottom: 5.0),
-                    color: Colors.grey.shade200,
-                    child: Text(
-                      'Replying to: ${message.replyTo!.text}',
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ),
-                Container(
-                  margin: const EdgeInsets.only(top: 5.0),
-                  child: Text(message.text),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
+                  onPressed: doSubtraction,
+                  child: const Text("-"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                  onPressed: doMultiplication,
+                  child: const Text("*"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: doDivision,
+                  child: const Text("/"),
                 ),
               ],
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.reply),
-            onPressed: () => onReply(message),
-          ),
-        ],
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+              onPressed: doClear,
+              child: const Text("Clear"),
+            ),
+          ],
+        ),
       ),
     );
   }
-}
-
-class Message {
-  final String text;
-  final Message? replyTo;
-
-  Message({required this.text, this.replyTo});
 }
